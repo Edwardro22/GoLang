@@ -1,57 +1,54 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
 	"os/exec"
-	"syscall"
+	"net"
+	"os"
+	"net/rpc/jsonrpc"
 )
 
+type ArgsSum struct {
+	Item1 int
+	Item2 int
+}
+type Reply struct {
+	C int
+	X string
+}
+var C *exec.Cmd
+
+ func start(cmd *exec.Cmd) {	
+	log.Printf("Waiting for Server to Start...")
+	/*cmd := exec.Command("./server")*/
+	log.Printf("Aici e pusa cmd.Start()")
+	err := cmd.Start()
+	log.Printf("Command finished with error: %v", err)
+    
+	
+}
+
 func main() {
-	switch os.Args[1] {
-	case "run":
-		parent()
-	case "child":
-		child()
-	default:
-		panic("wat should I do")
-	}
-}
+	C := exec.Command("./server")
+	go start(C)
+	
+	client, err := net.Dial("tcp", "localhost:9000")
+	log.Printf("Command finished with error: %v", err)
 
-func parent() {
-	cmd := exec.Command("/proc/self/exe", append([]string{"child"}, os.Args[2:]...)...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
-	}
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	defer client.Close()
 
-	if err := cmd.Run(); err != nil {
-		fmt.Println("ERROR", err)
-		os.Exit(1)
-	}
-}
-
-func child() {
-	must(syscall.Mount("rootfs", "rootfs", "", syscall.MS_BIND, ""))
-	must(os.MkdirAll("rootfs/oldrootfs", 0700))
-	must(syscall.PivotRoot("rootfs", "rootfs/oldrootfs"))
-	must(os.Chdir("/"))
-
-	cmd := exec.Command(os.Args[2], os.Args[3:]...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		fmt.Println("ERROR", err)
-		os.Exit(1)
-	}
-}
-
-func must(err error) {
+	c := jsonrpc.NewClient(client)
+	var reply Reply
+	var args *ArgsSum
+	
+	args = &ArgsSum{2, 3}
+	err = c.Call("MyServer.Sum", args, &reply)
 	if err != nil {
-		panic(err)
+		log.Printf("Command finished with error: %v", err)
 	}
+
+
+	log.Printf("Waiting for command to be killed...")
+	 err = C.Process.Signal(os.Interrupt);
+	log.Printf("Command finished with error: %v", err)
 }

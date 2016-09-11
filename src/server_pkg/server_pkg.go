@@ -73,7 +73,7 @@ myserver := new(MyServer)
 	server := rpc.NewServer()
 	server.Register(myserver)
 	server.HandleHTTP(rpc.DefaultRPCPath, rpc.DefaultDebugPath)
-    l, err := net.Listen("tcp", ":9000")
+    l, err := net.Listen("tcp", "localhost:9000")
     if err != nil {
         log.Fatalln(err.Error())
     }
@@ -84,7 +84,7 @@ myserver := new(MyServer)
             log.Fatalln(err.Error())
 			
         }
-
+		defer conn.Close()
          go server.ServeCodec(jsonrpc.NewServerCodec(conn))
      }
 
