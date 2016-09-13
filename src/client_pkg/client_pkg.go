@@ -1,18 +1,17 @@
 package client_pkg
- 
+
 import (
 	"fmt"
 	"log"
 	"net"
 	"net/rpc/jsonrpc"
-	
 )
-type Operations interface{
+
+type Operations interface {
 	Sum(args *ArgsSum, reply *Reply) error
 	Write(args *ArgsWrite, reply *Reply) error
 	Read(args *ArgsRead, reply *Reply) error
 }
-
 
 type ArgsSum struct {
 	Item1 int
@@ -30,7 +29,6 @@ type Reply struct {
 	X string
 }
 
-
 func checkErrorfatal(err error) {
 	if err != nil {
 		log.Fatal("MyServer error:", err)
@@ -42,8 +40,8 @@ func checkError(err error) {
 	}
 }
 
-func Client(p int,n int){
-	
+func Client(p int, n int) {
+
 	client, err := net.Dial("tcp", "localhost:9000")
 	checkError(err)
 
@@ -58,19 +56,15 @@ func Client(p int,n int){
 
 	args = &ArgsSum{p, n}
 
-	err = c.Call("MyServer.Sum", args, &reply)
-	checkErrorfatal(err)
-	
+	c.Call("MyServer.Sum", args, &reply)
+
 	write = &ArgsWrite{reply.C, "./String.txt"}
 
-	err = c.Call("MyServer.Write", write, &reply)
-	checkErrorfatal(err)
-	
+	c.Call("MyServer.Write", write, &reply)
 
 	read = &ArgsRead{"./String.txt"}
-	
-	err = c.Call("MyServer.Read", read, &reply)
-	checkErrorfatal(err)
-	
+
+	c.Call("MyServer.Read", read, &reply)
+
 	fmt.Println("Read from file:", reply.X)
 }

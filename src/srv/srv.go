@@ -1,12 +1,12 @@
 package main
 
 import(
-   /* "os"*/
+    "os"
     "os/exec"
     "net"
 	"net/rpc/jsonrpc"
 	 /*"os/signal" */  
-    "syscall"
+    
     )
 
 type ArgsSum struct {
@@ -30,13 +30,13 @@ func checkError(err error) {
 		panic(err)
 	}
 }
-/*
+
 func Client_Run(){
 		
 cmd := exec.Command("./server")
 cmd.Stderr = os.Stderr
 
-cmd := exec.Command("./server")
+/*cmd := exec.Command("./server")*/
 
 err := cmd.Start()
 if err != nil {
@@ -52,9 +52,9 @@ if err != nil {
     if err != nil {
         panic(err)
  	}
-}syscall
+}
 
-*/
+
 
 func Client_close(){
 	
@@ -67,10 +67,7 @@ func Client_close(){
 }
 
 func main(){
- /*Client_Run()*/
-cmd := exec.Command("setsid", "./server")
-
-
+go Client_Run()
 
     client, err := net.Dial("tcp", ":9000")
 	checkError(err)
@@ -81,7 +78,8 @@ cmd := exec.Command("setsid", "./server")
     
     var reply Reply
 	var args *ArgsSum
-	
+   /* var write *ArgsWrite
+    var read *ArgsRead*/
     
     args = &ArgsSum{2, 3}
 	err = c.Call("MyServer.Sum", args, &reply)
@@ -111,8 +109,5 @@ cmd := exec.Command("setsid", "./server")
 	if  rez != rez1 {
 		t.Errorf("Nu s-a scris ce trebuie")
 	}*/
-/*go Client_close()*/
- syscall.Kill(-p.run.Process.Pid, syscall.SIGKILL)
-
-
+go Client_close()
 }

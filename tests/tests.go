@@ -1,54 +1,87 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os/exec"
 	"net"
-	"os"
 	"net/rpc/jsonrpc"
+	"os/exec"
+	"time"
 )
 
 type ArgsSum struct {
 	Item1 int
 	Item2 int
 }
+type ArgsWrite struct {
+	Item     int
+	FilePath string
+}
+type ArgsRead struct {
+	FilePath string
+}
 type Reply struct {
 	C int
 	X string
 }
-var C *exec.Cmd
 
- func start(cmd *exec.Cmd) {	
-	log.Printf("Waiting for Server to Start...")
-	/*cmd := exec.Command("./server")*/
-	log.Printf("Aici e pusa cmd.Start()")
-	err := cmd.Start()
-	log.Printf("Command finished with error: %v", err)
-    
-	
+func checkErrorfatal(err error) {
+	if err != nil {
+		log.Fatal("MyServer error:", err)
+	}
+}
+func checkError(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
-func main() {
-	C := exec.Command("./server")
-	go start(C)
-	
-	client, err := net.Dial("tcp", "localhost:9000")
-	log.Printf("Command finished with error: %v", err)
+//ClientRun goes
+func ClientRun() {
 
-	defer client.Close()
-
-	c := jsonrpc.NewClient(client)
-	var reply Reply
-	var args *ArgsSum
-	
-	args = &ArgsSum{2, 3}
-	err = c.Call("MyServer.Sum", args, &reply)
+	cmd := exec.Command("go", "run", "server/server.go")
+	err := cmd.Start()
 	if err != nil {
-		log.Printf("Command finished with error: %v", err)
+
+		panic(err)
 	}
 
+	time.Sleep(150 * time.Millisecond)
+	err = cmd.Process.Kill()
+	// err = cmd.Process.Signal(os.Interrupt)
+	if err != nil {
+		panic(err)
+	}
 
-	log.Printf("Waiting for command to be killed...")
-	 err = C.Process.Signal(os.Interrupt);
-	log.Printf("Command finished with error: %v", err)
+}
+func main() {
+	go ClientRun()
+	time.Sleep(100 * time.Millisecond)
+	client, err := net.Dial("tcp", "localhost:9000")
+	checkError(err)
+	defer client.Close()
+	c := jsonrpc.NewClient(client)
+
+	var reply Reply
+	var args *ArgsSum
+	// var write *ArgsWrite
+	// var read *ArgsRead
+
+	args = &ArgsSum{2, 3}
+
+	err = c.Call("MyServer.Sum", args, &reply)
+	checkErrorfatal(err)
+	fmt.Println("Sum is", reply.C)
+	// write = &ArgsWrite{reply.C, "./String.txt"}
+	//
+	// err = c.Call("MyServer.Write", write, &reply)
+	//
+	// checkErrorfatal(err)
+	//
+	// read = &ArgsRead{"./String.txt"}
+	//
+	// err = c.Call("MyServer.Read", read, &reply)
+	// checkErrorfatal(err)
+	//
+	// fmt.Println("Read from file:", reply.X)
 }

@@ -1,0 +1,6 @@
+mode: set
+client_pkg/client_pkg.go:32.33,33.16 1 0
+client_pkg/client_pkg.go:33.16,35.3 1 0
+client_pkg/client_pkg.go:37.28,38.16 1 1
+client_pkg/client_pkg.go:38.16,39.13 1 0
+client_pkg/client_pkg.go:43.27,70.2 15 0
