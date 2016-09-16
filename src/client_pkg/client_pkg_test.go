@@ -9,27 +9,20 @@ import (
 	"time"
 )
 
-
-
-func ClientRun() {
+func ClientRun() *exec.Cmd {
 
 	cmd := exec.Command("./server")
 	err := cmd.Start()
 	if err != nil {
-
 		panic(err)
 	}
-
-	time.Sleep(300 * time.Millisecond)
-	err = cmd.Process.Kill()
-	if err != nil {
-		panic(err)
-	}
+	
+	return cmd
 }
 
 func TestClient(t *testing.T) {
-	go ClientRun()
-	time.Sleep(200 * time.Millisecond)
+	cmd:= ClientRun()
+	time.Sleep(10 * time.Millisecond)
 	client, err := net.Dial("tcp", "localhost:9000")
 	checkError(err)
 
@@ -74,6 +67,13 @@ func TestClient(t *testing.T) {
 	checkError(err)
 	if rez != rez1 {
 		t.Errorf("Nu s-a scris ce trebuie")
+	}
+
+	
+	
+	err = cmd.Process.Kill()
+	if err != nil {
+		panic(err)
 	}
 
 }
