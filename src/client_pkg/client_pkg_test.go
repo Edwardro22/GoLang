@@ -17,7 +17,7 @@ sa fac doar procese zombie :/ si cu server build-uit pus in folder
 
 func ClientRun() {
 
-	cmd := exec.Command("go", "run", "server/server.go")
+	cmd := exec.Command("./server")
 	err := cmd.Start()
 	if err != nil {
 
@@ -33,7 +33,7 @@ func ClientRun() {
 
 func TestClient(t *testing.T) {
 	go ClientRun()
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 	client, err := net.Dial("tcp", "localhost:9000")
 	checkError(err)
 

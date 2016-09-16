@@ -56,15 +56,18 @@ func Client(p int, n int) {
 
 	args = &ArgsSum{p, n}
 
-	c.Call("MyServer.Sum", args, &reply)
+	err = c.Call("MyServer.Sum", args, &reply)
+	checkErrorfatal(err)
 
 	write = &ArgsWrite{reply.C, "./String.txt"}
 
-	c.Call("MyServer.Write", write, &reply)
+	err = c.Call("MyServer.Write", write, &reply)
+	checkErrorfatal(err)
 
 	read = &ArgsRead{"./String.txt"}
 
-	c.Call("MyServer.Read", read, &reply)
+	err = c.Call("MyServer.Read", read, &reply)
+	checkErrorfatal(err)
 
 	fmt.Println("Read from file:", reply.X)
 }
