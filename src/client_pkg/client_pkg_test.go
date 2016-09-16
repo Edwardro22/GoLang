@@ -9,11 +9,7 @@ import (
 	"time"
 )
 
-/*
-Aici am incercat sa fac cum mi-ai spus da reuseam
-sa fac doar procese zombie :/ si cu server build-uit pus in folder
-:) deci nu e ca si ccum doar commanda aia e gresita :))
-*/
+
 
 func ClientRun() {
 
